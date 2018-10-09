@@ -1,0 +1,62 @@
+; E -> COUNTER
+; D -> INTR_COUNTER
+; B-C -> DELAY
+
+	IN 10H
+	MVI A,08H	;Set interupt mask
+	SIM
+	MVI E,FFH
+	MVI D,00H
+START:	
+	DI
+	LDA 2000H	;check input port and if msb is 1 enable interupt
+	RLC		;else disable it and move on with calculations
+	JNC NO_INT
+	EI
+NO_INT:
+	INR E		;increment counter and if count is more than 10H
+	MOV A,E	;reset counter
+	CPI 10H	
+	JNZ OUT_DEL
+	MVI A,00H
+	MVI E,00H
+OUT_DEL:		;after that perform output and implement a 0,2 delay
+	CMA 	
+	STA 3000H
+	LXI B,00C8H		;;  maybe implement delay with repeating display of
+	CALL DELB		;;  intr_counter
+	JMP START
+
+
+			;Increase intr_counter and if >15 then reset
+			;Then display result on the 7 seg and continue counting 
+			;until the next interupt
+INTR_ROUTINE:		
+	PUSH PSW
+	PUSH D
+	PUSH B
+	LDA 0900H
+	INR A
+	STA 0900H				
+	CPI 10H
+	JNZ DOCALL
+	MVI A,00H
+	STA 0900H
+DOCALL:
+	CALL DISPLAY
+	POP B
+	POP D
+	POP PSW	
+	EI
+	RET
+
+DISPLAY:		;Display intr counter to the first from left 7seg
+	LXI H,0A05H
+	MOV M,A
+	MVI L,00H
+	XCHG		;D-E has adress 0A00H
+	CALL STDM	;STDM changes all the regs
+	CALL DCD
+	RET	
+
+	END
