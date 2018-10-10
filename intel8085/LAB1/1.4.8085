@@ -5,80 +5,77 @@
 
 
 
-PREPS:      IN 10H      ;get rid of memory limitations
-            MVI A,0DH   ;give A the mask of 6.5 interruption
-            SIM     ;set interruption mask
-            MVI D,00H   
-            MVI E,01H   ;set original train state 
+PREPS:			IN 10H		;get rid of memory limitations
+			MVI A,0DH	;give A the mask of 6.5 interruption
+			SIM		;set interruption mask
+			MVI D,00H	
+			MVI E,01H	;set original train state 
 
-CHECKPOINT:     DI      ;disable interruptions during input's MSB check
-            MVI A,00H   ;while MSB is OFF (MSB=0)
-            STA 0900H   ;[0900H]=00H
-            LDA 2000H   
-            ANI 80H ;check MSB's state
-            CPI 00H
-            JZ CHECKPOINT   ;if it is OFF(MSB=0) go back to CHECKPOINT and take another input   
+CHECKPOINT:		DI		;disable interruptions during input's MSB check
+			MVI A,00H	;while MSB is OFF (MSB=0)
+			STA 0900H	;[0900H]=00H
+			LDA 2000H	
+			RAL 	;(CY)=MSB
+			JNC CHECKPOINT	;if it is OFF(MSB=0) go back to CHECKPOINT and take another input	
 
-            EI      ;if it is ON(MSB=1) enable interruptions
-            MVI A,01H   
-            STA 0900H   ;[0900H]=01H
-        
-CHECK_ROTATION: MOV A,D     
-            CPI 01H     
-            JZ TO_RIGHT ;if D=01H, go to TO_RIGHT (left->right rotation)
-                
-TO_LEFT:        MVI D,00H   ;update rotation register
-            MOV A,E     
-            CPI 80H ;if train has reached the left edge
-            JZ TO_RIGHT ;go to TO_RIGHT 
+			EI		;if it is ON(MSB=1) enable interruptions
+			MVI A,01H	
+			STA 0900H	;[0900H]=01H
+		
+CHECK_ROTATION:	MOV A,D		
+			CPI 01H		
+			JZ TO_RIGHT	;if D=01H, go to TO_RIGHT (left->right rotation)
+				
+TO_LEFT:		MVI D,00H	;update rotation register
+			MOV A,E		
+			CPI 80H	;if train has reached the left edge
+			JZ TO_RIGHT	;go to TO_RIGHT 
 
-            CMA     ;invert A due to leds invert logic
-            STA 3000H   ;save A to output port of leds
-            CMA     
+			CMA		;invert A due to leds invert logic
+			STA 3000H	;save A to output port of leds
+			CMA		
 
-            CALL DELAY  
-            RLC     ;move one spot to left
-            MOV E,A ;and then save the new train state
-            JMP CHECKPOINT
+			CALL DELAY	
+			RLC		;move one spot to left
+			MOV E,A	;and then save the new train state
+			JMP CHECKPOINT
 
-TO_RIGHT:       MVI D,01H   ;update rotation register
-            MOV A,E     
-            CPI 01H ;if train has reached the right edge
-            JZ TO_LEFT  ;go to TO_LEFT
+TO_RIGHT:		MVI D,01H	;update rotation register
+			MOV A,E		
+			CPI 01H	;if train has reached the right edge
+			JZ TO_LEFT	;go to TO_LEFT
 
-            CMA     
-            STA 3000H   
-            CMA     
+			CMA		
+			STA 3000H	
+			CMA		
 
-            CALL DELAY  
-            RRC     ;move one spot to right
-            MOV E,A ;and then save the new train state
-            JMP CHECKPOINT  
+			CALL DELAY	
+			RRC		;move one spot to right
+			MOV E,A	;and then save the new train state
+			JMP CHECKPOINT	
 
-DELAY:      DI      ;disable interruptions durind the delay routine 
-            CPI 01H ;if (train state = 01H)
-            JZ EXTRA_DELAY  
-            CPI 80H ;or if (train state = 80H) then go to EXTRA DELAY and cause a delay of 1sec
-            JZ EXTRA_DELAY  
-            LXI B,01F4H ;otherwise cause a delay of 0.5sec and jump to TELOS
-            CALL DELB   
-            JMP TELOS   
-EXTRA_DELAY:        
-            LXI B,03E8H ; BC = 1000 (decimal)
-            CALL DELB   
-TELOS:      EI      ;enable interruptions and return
-            RET     
+DELAY:			DI		;disable interruptions durind the delay routine	
+			CPI 01H	;if (train state = 01H)
+			JZ EXTRA_DELAY	
+			CPI 80H	;or if (train state = 80H) then go to EXTRA DELAY and cause a delay of 1sec
+			JZ EXTRA_DELAY	
+			LXI B,01F4H	;otherwise cause a delay of 0.5sec and jump to TELOS
+			CALL DELB	
+			JMP TELOS	
+EXTRA_DELAY:		LXI B,03E8H	
+			CALL DELB	
+TELOS:			EI		;enable interruptions and return
+			RET		
 
-INTR_ROUTINE:
-            PUSH PSW    
-            LDA 0900H   ;check the value of [0900H]
-            CPI 00H     ;if [0900H]=0 then the interruptions are rejected
-            JZ GO_ON    ;and jump to GO_ON 
-            MOV A,D     ;if [0900H]=1 then the interruptions are acceptable and thus
-            XRI 01H     ;the rotation changes { (left->right) <-> (right->left) }
-            MOV D,A     
-GO_ON:      POP PSW     
-            EI      ;enable interruptions and return
-            RET         
+INTR_ROUTINE:		PUSH PSW	
+			LDA 0900H	;check the value of [0900H]
+			CPI 00H	;if [0900H]=0 then the interruptions are rejected
+			JZ GO_ON	;and jump to GO_ON 
+			MOV A,D	;if [0900H]=1 then the interruptions are acceptable and thus
+			XRI 01H	;the rotation changes { (left->right) <-> (right->left) }
+			MOV D,A		
+GO_ON:			POP PSW		
+			EI		;enable interruptions and return
+			RET			
 
 END

@@ -1,55 +1,54 @@
-; E -> SECONDS COUNTER
-; D -> INTR_COUNTER
+; E -> COUNTER
 ; B-C -> DELAY
-; MEM[900H] :: #INTRS
-; MEM[901H] = {0: INTR DISABLED, 1: INTR ENABLED}
+; [0900] -> CONTAINS THE NUMBER OF INTERRUPTIONS
+; [0901] -> CONTAINS A VALUE THAT LETS US KNOW IF INTERRUPTIONS ARE ACCEPTABLE
 
-	IN 10H 		; MEM LIMITATIONS
-	MVI A,08H	; Set interupt mask
+	IN 10H
+	MVI A,0DH	;Set interupt mask
 	SIM
-	MVI E,FFH 	; WE ICREMENT FIRST, SO AT FIRST PASS E WILL BE 0
-	MVI D,00H
+	MVI E,FFH
 START:	
 	DI
 	MVI A,00H	;Disabled interrupts
 	STA 0901H
 	LDA 2000H	;check input port and if msb is 1 enable interupt
-	RLC			;else disable it and move on with calculations
+	RLC		;else disable it and move on with calculations
 	JNC NO_INT
-	EI 
+	EI
 	MVI A,01H	;If an interrupt was done between di-ei 
 	STA 0901H	;then the intr routine will return
 NO_INT:
-	INR E		;increment counter and if count is CNTR==16 (decimal)
-	MOV A,E		;reset counter
-	CPI 10H		; IS A==16(decimal) ?
+	CALL PR_SC
+	INR E		;increment counter and if count is more than 10H
+	MOV A,E	;reset counter
+	CPI 10H	
 	JNZ OUT_DEL
-	MVI A,00H 	; RESET
+	MVI A,00H
 	MVI E,00H
 OUT_DEL:		;after that perform output and implement a 0,2 delay
-	CMA 		; A = ~A
-	STA 3000H 	; SHOW ON LEDS
-	LXI B,00C8H		;;  maybe implement delay with repeating display of (BC)=200(decimal)
+	CMA 	
+	STA 3000H
+	LXI B,00C8H		;;  maybe implement delay with repeating display of
 	CALL DELB		;;  intr_counter
 	JMP START
 
 
-;Increase intr_counter and if >15 then reset
-;Then display result on the 7 seg and continue counting 
-;until the next interupt
+			;Increase intr_counter and if >15 then reset
+			;Then display result on the 7 seg and continue counting 
+			;until the next interupt
 INTR_ROUTINE:		
 	PUSH PSW
 	PUSH D
 	PUSH B
 	LDA 0901H	;check if an interrupt was requested when interrupts
-	CPI 00H		;was disabled
+	CPI 00H	;was disabled
 	JZ RETURN
-	LDA 0900H 	; # INTRS
-	INR A 		; #INTRS++
-	STA 0900H	; MEM[900H] = #INTRS			
+	LDA 0900H
+	INR A
+	STA 0900H				
 	CPI 10H
 	JNZ DOCALL
-	MVI A,00H 	; RESET
+	MVI A,00H
 	STA 0900H
 DOCALL:
 	CALL DISPLAY
@@ -63,10 +62,16 @@ RETURN:
 DISPLAY:		;Display intr counter to the first from left 7seg
 	LXI H,0A05H
 	MOV M,A
-	MVI L,00H
-	XCHG		;D-E has adress 0A00H
+	LXI D,0A00H		;D-E has adress 0A00H
 	CALL STDM	;STDM changes all the regs
 	CALL DCD
+	RET
+
+PR_SC:	PUSH D
+	LXI D,0A00H
+	CALL STDM
+	CALL DCD
+	POP D
 	RET	
 
-END
+	END
