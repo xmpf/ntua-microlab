@@ -1,0 +1,44 @@
+; MEM[0A00H] :: 7 SEGMENT DISPLAY 
+
+PREPS:	IN 10H		;get rid of memory limitations
+
+START:	CALL KIND	;get first input(x) from keyboard
+		MOV B,A	;B=x , xE[0,F]HEX
+		CALL KIND	;get second input(y) from keyboard	
+		MOV C,A	;C=y , yE[0,F]HEX
+				
+		MOV A,B	;A=x
+		RLC		;A=2x
+		RLC		;A=4x
+		RLC		;A=8x
+		RLC		;A=16x  
+		ADD C	;A=16x+y   
+				
+		MVI C,FFH	;set C=-1(hundreds counter)
+HUNDREDS:	
+		INR C		;C=C+1
+		SUI 64H		;subtract 100 from A
+		JNC HUNDREDS	;while CY=0,which means that A has a non negative value, keep count hundreds
+		ADI 64H	;restore A to his last non negative value       
+				
+		MVI B,FFH	;set B=-1(decades counter)
+DECADES:
+		INR B		;B=B+1
+		SUI 0AH		;subtract 10 from A
+		JNC DECADES	;while CY=0,which means that A has a non negative value, keep count decades
+		ADI 0AH		;restore A to his last non negative value,which in this case is equal to monades
+
+		LXI H,0A02H	;load HL with the directory of the third 7-segment from right
+		MOV M,C		;move hundreds to memory
+		DCX H		;load HL with the directory of the second 7-segment from right
+		MOV M,B		;move decades to memory
+		DCX H		;load HL with the directory of the first 7-segment from right
+		MOV M,A		;move monads to memory
+
+		LXI D,0A00H	;load DE register with the directory of the area which contains the six characters of 7-segment
+		CALL STDM	;get the message of the 6 characters of 7-segment (from DE) and store it where the DCD routine 
+					;expects to find them,which is in RAM in the positions (0BF0-0BF5)HEX
+		CALL DCD	;print on displays
+		JMP START	;refresh screen and get new inputs
+
+END

@@ -1,0 +1,49 @@
+;  E: sec counter
+
+PREPS:
+        IN 10H      ;get rid of memory limitations
+        LXI B,03E8H ;set register BC to 1000 so DELB routine can cause 1000 x 1msec = 1 sec delay
+    
+SET_ZERO:   
+        MVI E,00H   ;set sec counter to zero
+
+START:  CALL CHECK  ;load input and check the state of its MSB
+        MOV A,E     
+        CMA         ;invert A due to leds invert logic
+        STA 3000H   ;store counter's value to output
+        CALL DELB   ;cause delay of 1 sec
+    
+        MOV A,D     ;A gets the copy of input which is kept in CHECK routine
+        ANI 0FH     ;if the value defined by the four LSBs of input is 
+        CMP E       ;equal to the value of the counter 
+        JZ CHECKPOINT   ;go to CHECHPOINT
+
+NEXT_STEP:  
+        INR E       ;E=E+1      
+        JMP START   ;go to START and keep counting upwords
+
+CHECKPOINT: 
+        CPI 00H     ;check a corner case in which (counter's value)=(value defined by 4 LSBs of input)=0 
+        JZ START    ;so there is no point of counting downwards and thus go to START and get a new input
+
+        ; LOOP1 is where the counting downwards starts
+LOOP1:  CALL CHECK  ;load input and check the state of its MSB
+        DCR E       ;E=E-1
+        MOV A,E     
+        CMA         ; A = ~A
+        STA 3000H   ; SHOW ON LEDS
+        CALL DELB   ; (BC) x 1ms DELAY
+
+        MOV A,E         ; RESTORE VALUE 
+        CPI 00H         ; if (counter's value=0) go
+        JZ NEXT_STEP    ; to NEXT_STEP and start counting upwards,once again
+        JMP LOOP1       ; otherwise go to LOOP1 keep counting downwards 
+
+CHECK:  LDA 2000H   ;load input to A from the port of dip switches  
+        MOV D,A     ;keep a copy of input to D
+        RAL         ;rotate left so MSB=CY
+        JNC CHECK   ;if MSB is OFF (CY=0), then go back to CHECK and get input again
+        RET         ;if MSB is ON (CY=1) return 
+
+END 
+    
