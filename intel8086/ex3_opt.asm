@@ -227,6 +227,8 @@ NUMBERS_GRP:
     LEA DI,NUM_GRP      ; POINT TO NUMBERS GROUP
 NUMBERS_REP:
     PRINT [DI]          ; SHOW
+    
+
     INC DI              ; INCREMENT INDEX POINTER
     DEC CL
     CMP CL,0              ; COUNTER--
