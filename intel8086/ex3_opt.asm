@@ -108,23 +108,23 @@ READ_NEXT:
 	READ
 	CMP AL,0DH      	; ENTER PRESSED ? 
 	JE  RESULT 			; IF YES SHOW RESULT
-	
+;---------------------------------------------	
 	CMP AL,'*' 			; IS * ?
 	JE 	TERMINATE 		; IF YES TERMINATE
-
+;---------------------------------------------
     CMP AL,20H      	; IS WHITESPACE
     JE  READ_NEXT      	; SKIP - READ NEXT CHARACTER
-
+;---------------------------------------------
 	CMP AL,'0' 			;
 	JL  READ_NEXT 		; SKIP - READ NEXT CHARACTER
 	CMP AL,'9'			; 
 	JLE	SAVE_NUM 		;
-
+;---------------------------------------------
 	CMP AL,'A' 			;
 	JL  READ_NEXT 		; SKIP - READ NEXT CHARACTER
 	CMP AL,'Z'			; 
 	JLE	SAVE_UPPER 		;
-	
+;---------------------------------------------	
 	CMP AL,'a' 			; 
 	JL  READ_NEXT 		; SKIP - READ NEXT CHARACTER
 	CMP AL,'z'			; 
@@ -200,18 +200,26 @@ RESULT:
 ; SHOW GROUP UPPERCASE
 UPPERCASE_GRP:
     MEMREAD UPPER_INDX  ; LOAD UPPERCASE COUNTER INTO `CL`
+;---------------------------------------------
+    CMP CL,0            ; SKIP UPPERCASE
+    JZ  LOWERCASE_GRP
+;---------------------------------------------
     LEA DI,UP_GRP       ; POINT TO UPPERCASE GROUP
 UPPERCASE_REP:
     PRINT [DI]          ; SHOW CHARACTER
     INC DI              ; INCREMENT INDEX POINTER
     DEC CL              ; COUNTER--
     CMP CL,0
-    JGE UPPERCASE_REP    ; LOOP UNTIL ALL UPPERCASE CHARACTERS PRINTED
-    PRINT '-'           
+    JGE UPPERCASE_REP    ; LOOP UNTIL ALL UPPERCASE CHARACTERS PRINTED          
 
 ; SHOW GROUP LOWERCASE
 LOWERCASE_GRP:
+    PRINT '-' 
     MEMREAD LOWER_INDX  ; LOAD LOWERCASE COUNTER INTO `CL`
+;---------------------------------------------
+    CMP CL,0            ; SKIP LOWERCASE
+    JZ  NUMBERS_GRP
+;---------------------------------------------
     LEA DI,LOW_GRP      ; POINT TO LOWERCASE GROUP
  LOWERCASE_REP:
     PRINT [DI]          ; SHOW CHARACTER 
@@ -219,16 +227,22 @@ LOWERCASE_GRP:
     DEC CL              ; COUNTER--
     CMP CL,0
     JGE LOWERCASE_REP    ; LOOP UNTIL ALL LOWERCASE CHARACTERS PRINTED
-    PRINT '-'
 
 ; SHOW GROUP NUMBERS
 NUMBERS_GRP:
-    MEMREAD NUM_INDX    ; LOAD NUMBERS COUNTER INTO `CL` 
+    PRINT '-' 
+    MEMREAD NUM_INDX    ; LOAD NUMBERS COUNTER INTO `CL`
+;---------------------------------------------
+    CMP CL,0            ; SKIP NUMBERS
+    JZ  TERMINATE
+;---------------------------------------------
     LEA DI,NUM_GRP      ; POINT TO NUMBERS GROUP
 NUMBERS_REP:
     PRINT [DI]          ; SHOW
-    
-
+;---------------------------------------------
+    ; MISSING STORE MINIMUM
+    ; FUNCTIONALITY
+;---------------------------------------------
     INC DI              ; INCREMENT INDEX POINTER
     DEC CL
     CMP CL,0              ; COUNTER--

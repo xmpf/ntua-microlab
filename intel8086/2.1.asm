@@ -1,11 +1,14 @@
-include 'macros.asm'
+include './include/macros.asm'
 
 data segment
 	input		db 	"GIVE 4 OCTAL DIGITS: $"
 	output 		db 	0AH,0DH,"DECIMAL: $"
 	new_line		db	0AH,0DH,"$"
 	array_flp		dw	0000h,1250h,2500h,3750h,5000h,6250h,7500h,8750h
-ends
+ends                                                                      
+
+;array_flp contains the results of 0/8,1/8,2/8,3/8 etc in hex form but with the right decimal numeric value
+
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 stack segment
 	dw 128 dup(0)
@@ -16,80 +19,99 @@ code segment
 main proc FAR
 	mov ax,data
 	mov ds,ax
-	mov es,ax
+	mov es,ax   
+	
+;knowing that each octal digit is up to three bits
+;for each one we take as input we are gonna shift it 3 times left in order to
+;prepare it to merge with the next one
+;however,since we are gonna take 3 octal sto akeraio meros the msb of the first octal
+;is gonna overflow and disappear
+;so we deal with this problem by saving the first octal also
+;in BH and shift it 2 times right to only keep its msb	
 
-state1:
-	mov ax,0
+start:
+	mov ax,0            ;reset all regesters
 	mov bx,ax
 	mov cx,bx
 
-	print_str input
-	;mov dl,al
+	print_str input     ;print message input
 
-	call in_oct
-	cmp al,'D'
-	je finish
-	mov ah,al
-	shr ah,2
-	mov bh,ah
-	shl al,3
-	mov bl,al
-	call in_oct
-	cmp al,'D'
-	je finish
-	or al,bl
-	shl al,3
-	mov bl,al
-	call in_oct
-	cmp al,'D'
-	je finish
-	or al,bl
-	mov bl,al
-	print '.'
-	call in_oct
-	cmp al,'D'
-	je finish
-	mov cl,al
-	mov ch,0
-
-	print_str output
-	mov ax,bx
-	call print_dec
+	call in_oct         ;AL = first octal or 'D'
+	cmp al,'D'          ;if user enters 'D' in in_oct proc 
+	je finish           ;go to finish
+	mov ah,al           ;move first octal to AH
+	shr ah,2            ;and shift right 2 times in order to keep its msb
+	mov bh,ah           ;move AH to BH
+	shl al,3            ;shift first octal 3 times left in order to prepare it
+	mov bl,al           ;for the next octal and store it to BL
+	
+	call in_oct         ;AL = second octal or 'D'
+	cmp al,'D'          ;if user enters 'D' in in_oct proc
+	je finish           ;go to finish
+	or al,bl            ;merge first and second octal to AL
+	shl al,3            ;and then shift the new AL 3 times 
+	                    ;in order to prepare it for the next
+	mov bl,al           ;move AL to BL
+	
+	call in_oct         ;al = third octal or 'D'
+	cmp al,'D'          ;if user enters 'D' in in_oct proc
+	je finish           ;go to finish
+	or al,bl            ;merge them all and put them in BL
+	mov bl,al           
+	                    ;now BX has the first three octals 
 	print '.'
 	
-	mov bx,cx
-    shl bx,1
-	mov cx,array_flp[bx]
+	call in_oct         ;al = forth octal or 'D'
+	cmp al,'D'          ;if user enters 'D' in in_oct proc
+	je finish           ;go to finish
+	mov cl,al           ;move AL to CL
+	mov ch,0            
+
+	print_str output    ;print output message
+	
+	mov ax,bx
+	call print_dec      ;print first three octals as decimal
+	print '.'
+	
+	mov bx,cx           ;double the value of the final octal
+    shl bx,1            ;in order to point at the right address of the 
+	mov cx,array_flp[bx];look up table which contains every case scenario in hex form
 	
 	mov al,ch
-	call print_hex
+	call print_hex      ;print the first two hex digits which however are made to
+	                    ;have the right decimal numeric value :P
 	
-	shr cl,4
-	mov dl,cl
-	call out_hex
+	shr cl,4            ;shift right 4 times in order to isolate the third hex digit
+	mov dl,cl           ;move CL to DL
+	call out_hex        ;and print it as hex digit
 	print_str new_line
-	jmp state1
+	print_str new_line  ;go to next line
+	jmp start           ;go to start label and start over
 
 finish:
-	exit
+	exit                ;invoke DOS software interrupt
 main endp
 
 ; ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-; ==IN_OCT==
+; ==In_Oct== 
+; Repeatedly requests a character from keyboard until user
+; enters an octal digit. The octal digit is echoed on the screen
+; The value of the digit is returned in AL.
+; Routine is terminated if user enters 'D'
 ; MODIFIES: FLAGS, AX
 ; REQUIRES: <iolib.asm>: PRINT, READ
 
 in_oct proc NEAR
 _OIGNORE:
-	READ		
-	cmp AL, 'D'
-	je _OQUIT
+	READ		 ;read a character from keyboard   
+	cmp AL, 'D'  ;if user enters 'D' 
+	je _OQUIT    ;terminate program
 	cmp AL,'0'
-	jl _OIGNORE
-	cmp AL,'7'
+	jl _OIGNORE  ;if chr(AL)<'0' or chr(AL)>'9' 
+	cmp AL,'7'   ;get new input
 	jg _OIGNORE
-	PRINT AL
-	sub AL, '0'
+	PRINT AL     ;else print number on screen and
+	sub AL, '0'  ;get numeric value
 _OQUIT:
 	ret
 endp
