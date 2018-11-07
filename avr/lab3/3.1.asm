@@ -1,9 +1,7 @@
-;
+;----------------------------------
 ; 3.1.asm
-;
-; Created: 10/30/2018 10:03:01 AM
-; Author : Nick Maritsas
-;
+; Author : Michalis Papadopoullos
+;----------------------------------
 
 .include "m16def.inc"
 ;.include "wait.asm"
