@@ -5,7 +5,7 @@
 ;	if INPUT == 15 then BLINK_YES (LEDS PA[7:0] ON FOR 4 SECONDS)
 ;	else BLINK_NO (LEDS PA[7:0] ON FOR 8 ROUNDS OF ON/OFF = 0.25 + 0.25 SECONDS)
 
-.include 'm16def.inc'
+.include "m16def.inc"
 
 ; data segment
 .dseg
@@ -13,6 +13,53 @@
 
 ; code segment
 .cseg
+
+.def cnt=r16
+
+; ------------------------------------------------
+; =============== [MACROS] =============== 
+; ------------------------------------------------
+.macro SET_LEDS_ON
+	; MACRO: SET ALL LEDS OF PORTA TO ON
+	; AFFECTED REGISTER: 
+	ser r18
+	out PORTA,r18
+.endm
+; ------------------------------------------------
+.macro SET_LEDS_OFF
+	; MACRO: SET ALL LEDS OF PORTA TO ON
+	; AFFECTED REGISTER: r20
+	clr r20
+	out PORTA,r20
+.endm
+; ------------------------------------------------
+.macro BLINK_NO
+	; LEDS PA[7:0] BLINK ON/OF FOR 4 SECONDS
+	ldi cnt,0x08 		; iterate 8 times 
+L1:
+	SET_LEDS_ON 		; set leds on (MACRO)
+	ldi r24,low(250)
+	ldi r25,high(250)
+	rcall wait_msec			; delay 0.25msec (MACRO)
+	
+	SET_LEDS_OFF 		; set leds off (MACRO)
+	ldi r24,low(250)
+	ldi r25,high(250)
+	rcall wait_msec
+	
+	dec cnt 			; cnt--
+	cpi cnt, 0x0 		; (cnt == 0) ?
+	brne L1 			; if cnt != 0 goto L1
+.endm
+; ------------------------------------------------
+.macro BLINK_YES
+	; LEDS PA[7:0] OPEN FOR 4 SECONDS
+	SET_LEDS_ON 		; ALL LEDS ON (MACRO)
+	
+	ldi r24,low(4000)
+	ldi r25,high(4000)
+	rcall wait_msec			; DELAY 4 SECONDS (MACRO)
+.endm
 
 .org 0x0
 rjmp INIT		; ON RESET JUMP TO INIT
@@ -39,108 +86,47 @@ MAIN:
 
 ; =========== [SCAN KEYPAD] ===========
 SCAN_FST:
-	ldi r24,0x15 	; r24 xronos spinthirismou (*tha doume stin pra3i poio value volevei*)
-	; r25: [A|3|2|1][B|6|5|4]
-	; r24: [C|9|8|7][D|#|0|*]
-	rcall scan_keypad_rising_edge ; r25:r25 holds input
-	push r25
+	; r24 xronos spinthirismou (*tha doume stin pra3i poio value volevei*)
+	ldi r24,0x15
+	
+	; r25: [A|3|2|1]|[B|6|5|4]
+	; r24: [C|9|8|7]|[D|#|0|*]
+	; r25:r25 holds input
+	rcall scan_keypad_rising_edge 
+	adiw r24,0x0000			; if r24 == 0 then 
+	breq SCAN_FST			; goto SCAN_FST
 ; =============================================
-; XREIAZETAI NA KANW JMP MEXRI NA PARW INPUT?
-	rcall keypad_to_ascii 	; EPISTREFEI r24=0 AN DEN PATITHIKE KNAS DIAKOPTIS
-	cpi r24,0x0 			; if r24 == 0 then 
-	rjmp SCAN_FST			; goto SCAN_FST
+	; EPISTREFEI r24=0 AN DEN PATITHIKE KNAS DIAKOPTIS
+	rcall keypad_to_ascii 	
+	cpi r24,0x31			; check if '1' pressed
+	brne B_NO  				; if YES then continue else goto BLINK_NO (jumps to MAIN)
 ; =============================================
-	pop r25
-	sbrs r25,5 		; check if '1' pressed
-	BLINK_NO  		; if YES then continue else goto BLINK_NO (jumps to MAIN)
 
-	; == STON r24 exume ton ASCII(1)
 SCAN_SND:
-	ldi r24,0x15 	; delay value (spinthirismos)
+	; delay value (spinthirismos)
+	ldi r24,0x15
+	
 	; r25: [A|3|2|1][B|6|5|4]
 	; r24: [C|9|8|7][D|#|0|*]
+	; r25:r25 holds input
 	rcall scan_keypad_rising_edge
-	push r25
+	adiw r24,0x0000
+	breq SCAN_SND
 ; =============================================
-; XREIAZETAI NA KANW JMP MEXRI NA PARW INPUT?
+
 	; CONVERT TO ASCII
 	rcall keypad_to_ascii 	; EPISTREFEI r24=0 AN DEN PATITHIKE KNAS DIAKOPTIS
-	cpi r24,0x0 			; if r24 == 0 then
-	rjmp SCAN_SND 			; goto SCAN_SND
+	cpi r24,0x35 			; if r24 == 5 then
+	brne B_NO				; goto SCAN_SND
 ; =============================================
-	pop r25
-	sbrc r25,2 	 	 ; check if '5' pressed
+	
+B_YES:
 	BLINK_YES  		 ; 	 BLINK BLINK_YES (jumps to MAIN)
-	BLINK_NO 	 	 ; 	 BLINK BLINK_NO (jumps to MAIN)
+	rjmp MAIN
 
+B_NO:
+	BLINK_NO 	 	 ; 	 BLINK BLINK_NO (jumps to MAIN
 	rjmp MAIN 		 ; PROGRAMMA SYNEXOUS LEITOURGIAS
-
-; ------------------------------------------------
-; =============== [MACROS] =============== 
-; ------------------------------------------------
-.macro SET_LEDS_ON
-	; MACRO: SET ALL LEDS OF PORTA TO ON
-	; AFFECTED REGISTER: r18
-	push r18
-	ser r18
-	out PORTA,r18
-	pop r18	
-.endm
-; ------------------------------------------------
-.macro SET_LEDS_OFF
-	; MACRO: SET ALL LEDS OF PORTA TO ON
-	; AFFECTED REGISTER: r20
-	push r20
-	clr r20
-	out PORTA,r20
-	pop r20
-.endm
-; ------------------------------------------------
-.macro DELAY_YES
-	; MACRO: DELAY 4 SECONDS
-	; AFFECTED REGISTERS: r25:r24
-	push r24
-	push r25
-	ldi r24,low(4000)
-	ldi r25,high(4000)
-	rcall wait_msec
-	pop r25
-	pop r24
-.endm
-; ------------------------------------------------
-.macro DELAY_NO
-	; MACRO: DELAY 0.25 SECONDS
-	; AFFECTED REGISTERS: r25:r24
-	push r24
-	push r25
-	ldi r24,low(250)
-	ldi r25,high(250)
-	rcall wait_msec
-	pop r25
-	pop r24
-.endm
-; ------------------------------------------------
-.macro BLINK_NO:
-	; LEDS PA[7:0] BLINK ON/OF FOR 4 SECONDS
-	ldi r18,0x07 		; iterate 8 times 
-L1:
-	SET_LEDS_ON 		; set leds on (MACRO)
-	DELAY_NO 			; delay 0.25msec (MACRO)
-	SET_LEDS_OFF 		; set leds off (MACRO)
-	DELAY_NO 			; delay 0.25msec (MACRO)
-	dcr r18 			; r18--
-	cpi r18, 0x0 		; (r18 == 0) ?
-	brne L1 			; if r18 != 0 goto L1
-	rjmp MAIN
-.endm
-; ------------------------------------------------
-.macro BLINK_YES:
-	; LEDS PA[7:0] OPEN FOR 4 SECONDS
-	SET_LEDS_ON 		; ALL LEDS ON (MACRO)
-	DELAY_YES 			; DELAY 4 SECONDS (MACRO)
-	rjmp MAIN
-.endm
-
 
 ; ------------------------------------------------
 ; =============== [PROCEDURES] =============== 
@@ -215,4 +201,57 @@ scan_keypad_rising_edge:
 	ld r23 ,X+
 	ld r22 ,X
 	st X ,r24
+	ret
 ; ------------------------------------------------
+keypad_to_ascii:	
+	movw r26 ,r24 	
+	ldi r24 ,'*'
+	sbrc r26 ,0
+	ret
+	ldi r24 ,'0'
+	sbrc r26 ,1
+	ret
+	ldi r24 ,'#'
+	sbrc r26 ,2
+	ret
+	ldi r24 ,'D'
+	sbrc r26 ,3		
+	ret			
+	ldi r24 ,'7'
+	sbrc r26 ,4
+	ret
+	ldi r24 ,'8'
+	sbrc r26 ,5
+	ret
+	ldi r24 ,'9'
+	sbrc r26 ,6
+	ret
+	ldi r24 ,'C'
+	sbrc r26 ,7
+	 ret
+	ldi r24 ,'4'	
+	sbrc r27 ,0	
+	ret
+	ldi r24 ,'5'
+	sbrc r27 ,1
+	ret
+	ldi r24 ,'6'
+	sbrc r27 ,2
+	ret
+	ldi r24 ,'B'
+	sbrc r27 ,3
+	ret
+	ldi r24 ,'1'
+	sbrc r27 ,4
+	ret
+	ldi r24 ,'2'
+	sbrc r27 ,5
+	ret
+	ldi r24 ,'3'
+	sbrc r27 ,6
+	ret
+	ldi r24 ,'A'
+	sbrc r27 ,7
+	ret
+	clr r24
+	ret
