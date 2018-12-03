@@ -25,9 +25,7 @@
  </OUTPUT_FILES>
  <LABELS>
   <_tmp_><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>20</LINE></_tmp_>
-  <NODEVMSG><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>24</LINE></NODEVMSG>
-  <KEYPADSELECT><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>25</LINE></KEYPADSELECT>
-  <reset><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>41</LINE></reset>
+  <reset><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>36</LINE></reset>
   <scan_row><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\include/keypad_hex.asm</FILE><LINE>1</LINE></scan_row>
   <back_><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\include/keypad_hex.asm</FILE><LINE>3</LINE></back_>
   <scan_keypad><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\include/keypad_hex.asm</FILE><LINE>15</LINE></scan_keypad>
@@ -46,24 +44,30 @@
   <_one_more_><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\include/one_wire.asm</FILE><LINE>64</LINE></_one_more_>
   <one_wire_transmit_bit><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\include/one_wire.asm</FILE><LINE>84</LINE></one_wire_transmit_bit>
   <one_wire_reset><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\include/one_wire.asm</FILE><LINE>115</LINE></one_wire_reset>
-  <main><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>58</LINE></main>
-  <USE_KEYPAD><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>76</LINE></USE_KEYPAD>
-  <USE_SENSOR><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>71</LINE></USE_SENSOR>
-  <sensor_temp><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>222</LINE></sensor_temp>
-  <SKIP_KEYPAD><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>80</LINE></SKIP_KEYPAD>
-  <keypad_temp><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>173</LINE></keypad_temp>
-  <print_temp><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>92</LINE></print_temp>
-  <TEMP0><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>155</LINE></TEMP0>
-  <PROSIMO><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>101</LINE></PROSIMO>
-  <POSITIVE><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>106</LINE></POSITIVE>
-  <NEGATIVE><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>111</LINE></NEGATIVE>
-  <SKIP_NEGATIVE><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>116</LINE></SKIP_NEGATIVE>
-  <decades><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>130</LINE></decades>
-  <print_decades><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>137</LINE></print_decades>
-  <print_units><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>145</LINE></print_units>
-  <EXIT0><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>158</LINE></EXIT0>
-  <keypad_read><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>164</LINE></keypad_read>
-  <sensor_error><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>198</LINE></sensor_error>
-  <L1><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>211</LINE></L1>
+  <main><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>53</LINE></main>
+  <USE_KEYPAD><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>74</LINE></USE_KEYPAD>
+  <USE_SENSOR><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>67</LINE></USE_SENSOR>
+  <sensor_temp><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>300</LINE></sensor_temp>
+  <printw><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>187</LINE></printw>
+  <SKIP_KEYPAD><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>78</LINE></SKIP_KEYPAD>
+  <keypad_temp><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>240</LINE></keypad_temp>
+  <print_temp><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>101</LINE></print_temp>
+  <PROCESSING_R19><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>117</LINE></PROCESSING_R19>
+  <decades><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>140</LINE></decades>
+  <print_decades><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>147</LINE></print_decades>
+  <print_units><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>157</LINE></print_units>
+  <CONTINUE1><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>166</LINE></CONTINUE1>
+  <EXIT0><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>177</LINE></EXIT0>
+  <no_error><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>194</LINE></no_error>
+  <sensor_error_msg><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>272</LINE></sensor_error_msg>
+  <NEG_ZERO><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>197</LINE></NEG_ZERO>
+  <POS_ZERO><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>204</LINE></POS_ZERO>
+  <ZERO><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>215</LINE></ZERO>
+  <CONTINUE><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>210</LINE></CONTINUE>
+  <keypad_read><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>223</LINE></keypad_read>
+  <EXIT1><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>236</LINE></EXIT1>
+  <sensor_error><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>342</LINE></sensor_error>
+  <isTxFinished><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>312</LINE></isTxFinished>
+  <done><FILE>C:\Documents and Settings\goji\My Documents\AVRStudio 5.1\6_2\6_2\6_2.asm</FILE><LINE>338</LINE></done>
  </LABELS>
 </ASSEMBLER_INFO>
