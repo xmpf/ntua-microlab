@@ -54,7 +54,7 @@ main:
 	; we can make this to change on runtime 
 	; by checking a specific register (eg: PINAx)
 	; preload device select option
-	ldi r20,0x01
+	ldi r20,0x00
 
 	; initialize lcd screen
 	rcall lcd_init
@@ -76,9 +76,9 @@ USE_KEYPAD:
 	rcall keypad_temp
 
 SKIP_KEYPAD:
-	; wait 100ms
-	ldi r24,low(200)
-	ldi r25,high(200)
+	; wait 250ms
+	ldi r24,low(250)
+	ldi r25,high(250)
 	rcall wait_msec
 	
 	; while (1)
@@ -86,42 +86,49 @@ SKIP_KEYPAD:
 	ret
 ;; [/main]
 
-.macro NEGATIVE
-	ldi r24,'-'
-	rcall lcd_data	; print '-'
-	com r19			; One\'s complement of LO byte
-.endm
-
-.macro POSITIVE
-	ldi r24,'+'
-	rcall lcd_data	; print '+'
-.endm
-
 ; print temperature
 print_temp:
 	; keep backup of HO & LO byte
-	push r24
 	mov r19,r24
 
 	; POSITIVE OR NEGATIVE
-	sbrs r25,7
-	NEGATIVE		; prints '-'
-					; and complements r19
 	sbrc r25,7
-	POSITIVE		; prints '+'
+	rjmp NEGATIVE	; prints '-'
+					; and complements r19
+	cpi r25,0x00
+	breq POSITIVE	; prints '+'
 
+
+NEGATIVE:
+	ldi r24,'-'
+	rcall lcd_data	; print '-'
+	com r19			; One\'s complement of LO byte
+	inc r19
+;	cpi r19,0x37
+;	brlo PROCESSING_R19
+;	lsr r19
+	rjmp PROCESSING_R19
+
+POSITIVE:
+	ldi r24,'+'
+	rcall lcd_data	; print '+'
+	; maximal temp = +125 = 0x7C
+	; therefore we mask everything with 0x7F = 0b 0111 xxx
+	andi r19,0x7F
+	
+	
 	; -55 <= TEMPERATURE <= +125
 	; therefore TEMPERATURE is contained only
 	; in 1 byte \r19\
 
 PROCESSING_R19:
+	lsr r19
+	clr r25
 	clr r21			; flag
 	clr r18			; r18 will hold number of decades
 	ldi r17,'0'		; ASCII code of 0
 
-	; maximal temp = +125 = 0x7C
-	; therefore we mask everything with 0x7F = 0b 0111 xxx
-	andi r19,0x7F
+
 	
 	; check if we have a hundred
 	cpi r19,0x64
@@ -164,8 +171,8 @@ print_units:
 	rcall lcd_data
 	
 CONTINUE1:
-	add r19,r17			; r19 holds units
-	mov r24,r19			; convert value to ASCII (+ '0')
+	add r24,r19			; r19 holds units
+	add r24,r17			; convert value to ASCII (+ '0')
 	rcall lcd_data		; print units
 
 	; print Celsius
@@ -195,16 +202,9 @@ no_error:					; r25:r24 != 0x8000 => NO ERROR
 	; if its 0x0000 or 0xffff
 	; then just print 0 without sign
 	; actually this is redundant as we should only check value of \r24\
-NEG_ZERO:
-	cpi r25,0xff
-	brne POS_ZERO
+CHECK_ZERO:
 	cpi r24,0xff
-	brne POS_ZERO
-	rjmp ZERO
-
-POS_ZERO:
-	cpi r25,0x00
-	brne CONTINUE
+	breq ZERO
 	cpi r24,0x00
 	breq ZERO
 
@@ -331,13 +331,16 @@ isTxFinished:
 	rcall one_wire_receive_byte
 	mov r25,r24
 	pop r24
-	; ?? 
+ 
 	sbrs r25,0
 	rjmp done
 	dec r24
 
 done:
+	push r24
+	lsr r24
 	out PORTA,r24
+	pop r24
 	ret
 
 sensor_error:
