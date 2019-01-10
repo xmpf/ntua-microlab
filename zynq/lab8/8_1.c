@@ -53,25 +53,26 @@ int main()
     /* Set the direction for all switches signals as inputs */
     XGpio_SetDataDirection(&switches_inst, 1, 1);
 
-    uint32_t led_value = 0;
+    uint32_t led_value = 1;
     uint32_t buttons_value = 0;
-    uint32_t switches_value = 0;
-    int32_t  adder = 1;
+    int dir = 0;		// if dir=0 direction is to the left
 
     while(1) {
     	buttons_value = XGpio_DiscreteRead(&buttons_inst, 1);
-    	if ( buttons_value != 0x1 ) {
+    	if ( buttons_value != 0x01 ) {
     		/* Set the LED to High */
 			XGpio_DiscreteWrite(&leds_inst, 1, led_value);
     		for (delay = 0; delay < LED_DELAY; delay++);
 
-    		led_value += adder;
+    		if (led_value == 0x08 && dir == 0){
+    			dir = 1;
+    		}
+    		else if (led_value == 0x01 && dir == 1){
+    			dir = 0;
+    		}
 
-    		xil_printf("DEBUG: IS WORKING\r\n");
-
-    		if ( led_value == 0xf ) { adder = -1; }
-    		else if ( led_value == 0x0 ) { adder = 1; }
-
+    		if (dir) led_value = led_value >> 1;
+    		else led_value = led_value << 1;
 
     	}
     }
